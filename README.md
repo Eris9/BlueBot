@@ -1,0 +1,2 @@
+# Cogmaster
+Cog manager bot
