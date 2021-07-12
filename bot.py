@@ -101,8 +101,10 @@ with open("config.json","r") as z:
     cefgx = json.load(z)
 for ext in cefgx["toload"]:
     for file in listdir(f'cogs/{ext}'):
+        if file.endswith('.py'):
+            bot.load_extension(f'cogs.{file[:-3]}')
+for file in listdir(f'MyOwn/'):
     if file.endswith('.py'):
-        bot.unload_extension(f'cogs.{file[:-3]}')
         bot.load_extension(f'cogs.{file[:-3]}')
 
 @bot.event
@@ -146,6 +148,8 @@ async def cogsetup(ctx,directory=None):
     if cefg["setup"] == "done":
         comment = "re-"
     cefg["directory"] = directory
+    os.system(f"mkdir {directory}")
+    os.system(f"mkdir MyOwn")
     cefg["setup"] = "done"
     with open("config.json","w") as l:
         json.dump(cefg,l)
