@@ -54,7 +54,7 @@ async def instmod(ctx,cfg):
         try:
             cogd = cefg["directory"]
         except KeyError:
-            return await ctx.author.send("ERROR: 'Not configured cog directory yet. Please run [p]setup'")
+            return await ctx.author.send("ERROR: 'Not configured cog directory yet. Please run [p]csetup'")
         os.system(f"cd {cogd} && mkdir {name}")
         os.system(f"mkdir modules/{name}")
         await loadring.edit(embed=discord.Embed(title="CogMaster",description="loading directory...",color=ctx.author.color))
@@ -113,11 +113,15 @@ async def on_ready():
     
 @bot.command(aliases=["cinstall","ci","cinst"])
 async def coginstall(ctx,repo):
+    if ctx.author.id not in devs:
+        return await ctx.send("ERROR:'Developer requirement'")
     linktocfg = getmodule(repo)
     await instmod(ctx,linktocfg)
 
 @bot.command(aliases=["cremove","cr","crm"])
 async def cogremove(ctx,module):
+    if ctx.author.id not in devs:
+        return await ctx.send("ERROR:'Developer requirement'")
     status = "null"
     try:
         with open("config.json","r") as z:
@@ -132,5 +136,19 @@ async def cogremove(ctx,module):
     with open("config.json","w") as k:
         json.dump(cefg,k)
     await ctx.send(f"Successfully removed {module}")
+@bot.command(aliases=["csetup"])
+async def cogsetup(ctx,directory=None):
+    if directory == None:
+        return await ctx.send("Please enter a cog directory")
+    comment = ""
+    with open("config.json","r") as l:
+        cefg = json.load(l)
+    if cefg["setup"] == "done":
+        comment = "re-"
+    cefg["directory"] = directory
+    cefg["setup"] = "done"
+    with open("config.json","w") as l:
+        json.dump(cefg,l)
+    await ctx.send(f"{comment}Setup successfull")
     
 bot.run("token")
