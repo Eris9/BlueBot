@@ -43,20 +43,27 @@ async def instmod(ctx,cfg):
             mod = json.load(f)
         with open("config.json","r") as k:
             cefg = json.load(k)
-        name = mod["name"]
-        version = mod["version"]
-        author = mod["author"]
-        files = mod["files"]
+        try:
+            name = mod["name"]
+            version = mod["version"]
+            author = mod["author"]
+            files = mod["files"]
+            modules = mod["modules"]
+        except KeyError:
+            return await ctx.author.send("ERROR: 'Cogcfg.json not made properly'")
         try:
             cogd = cefg["directory"]
         except KeyError:
             return await ctx.author.send("ERROR: 'Not configured cog directory yet. Please run [p]setup'")
         os.system(f"cd {cogd} && mkdir {name}")
+        os.system(f"mkdir modules/{name}")
         await loadring.edit(embed=discord.Embed(title="CogMaster",description="loading directory...",color=ctx.author.color))
         asyncio.sleep(2)
         await loadring.edit(embed=discord.Embed(title="CogMaster",description="downloading files...",color=ctx.author.color))
         for url in files:
             os.system(f"cd {cogd}/{name} && wget {url}")
+        for url2 in modules:
+            os.system(f"cd modules/{name} && wget {url2}")    
         await loadring.edit(embed=discord.Embed(title="CogMaster",description="downloaded files...",color=ctx.author.color))
         asyncio.sleep(1)
         try:
@@ -90,8 +97,40 @@ log_write("starting cogmaster")
 bot = commands.AutoShardedBot(command_prefix='cm!')
 bot.remove_command('help')
 
+with open("config.json","r") as z:
+    cefgx = json.load(z)
+for ext in cefgx["toload"]:
+    for file in listdir(f'cogs/{ext}'):
+    if file.endswith('.py'):
+        bot.unload_extension(f'cogs.{file[:-3]}')
+        bot.load_extension(f'cogs.{file[:-3]}')
+
 @bot.event
 async def on_ready():
     DiscordComponents(bot)
     await bot.change_presence(activity=discord.Watching(name='Cogs in the wall'))
     log_write('We have logged in as {0.user}'.format(bot))
+    
+@bot.command(aliases=["cinstall","ci","cinst"])
+async def coginstall(ctx,repo):
+    linktocfg = getmodule(repo)
+    await instmod(ctx,linktocfg)
+
+@bot.command(aliases=["cremove","cr","crm"])
+async def cogremove(ctx,module):
+    status = "null"
+    try:
+        with open("config.json","r") as z:
+            cefgx = json.load(z)
+        cogd = cefg["directory"]
+        os.system(f"rm -rf {cogd}/{module}")
+    except:
+        status = 1
+        return await ctx.send("Failed removal, this could be due to incorrect directory setting, module not found or unknown errors")
+    if status == "null":
+        cefg["toload"].remove(module)
+    with open("config.json","w") as k:
+        json.dump(cefg,k)
+    await ctx.send(f"Successfully removed {module}")
+    
+bot.run("token")
