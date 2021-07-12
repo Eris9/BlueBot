@@ -19,10 +19,10 @@ To setup your respository, simply create a github repository and put in the foll
 *save as `cogcfg.json`*
 ```json
 {
-"name": "example"
-"version": "1.0"
-"author": "Eris9/Kaneki"
-"files": ["link1","link2pyfile"]
+"name": "example",
+"version": "1.0",
+"author": "Eris9/Kaneki",
+"files": ["link1","link2pyfile"],
 "modules": ["link1","link2pyfile"]
 }
 ```
