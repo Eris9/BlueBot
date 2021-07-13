@@ -28,6 +28,7 @@ def getmodule(repolink):
 
 async def instmod(ctx,cfg):
     try:
+        cogd = "cogs/"
         loadring = await ctx.send(embed=discord.Embed(title="CogMaster",description="getting module...",color=ctx.author.color))
         first = False
         try:
@@ -65,6 +66,9 @@ async def instmod(ctx,cfg):
         for url2 in modules:
             os.system(f"cd modules/{name} && wget {url2}")    
         await loadring.edit(embed=discord.Embed(title="CogMaster",description="downloaded files...",color=ctx.author.color))
+        for file in listdir(f'cogs/{name}'):
+            if file.endswith('.py'):
+                bot.load_extension(f'cogs.{name}.{file[:-3]}')
         asyncio.sleep(1)
         try:
             cefg["toload"].append(name)
@@ -77,10 +81,10 @@ async def instmod(ctx,cfg):
         with open("config.json","r") as z:
             cefgx = json.load(z)
         for ext in cefgx["toload"]:
-            for file in listdir(f'cogs/{ext}'):
+            for file in listdir(f'{cogd}/{ext}'):
             if file.endswith('.py'):
-                bot.unload_extension(f'cogs.{file[:-3]}')
-                bot.load_extension(f'cogs.{file[:-3]}')
+                bot.unload_extension(f'{cogd}.{ext}.{file[:-3]}')
+                bot.load_extension(f'{cogd}.{ext}.{file[:-3]}')
         await loadring.edit(embed=discord.Embed(title="CogMaster",description=f"Finished installing {name} v{version} by {author}",color=discord.Color.green()))
     except:
         await loadring.edit(embed=discord.Embed(title="CogMaster",description=f"Failed install",color=discord.Color.red()))
@@ -100,12 +104,12 @@ bot.remove_command('help')
 with open("config.json","r") as z:
     cefgx = json.load(z)
 for ext in cefgx["toload"]:
-    for file in listdir(f'cogs/{ext}'):
+    for file in listdir(f'{cefg["directory"]}/{ext}'):
         if file.endswith('.py'):
-            bot.load_extension(f'cogs.{file[:-3]}')
+            bot.load_extension(f'{cefg["directory"]}.{ext}.{file[:-3]}')
 for file in listdir(f'MyOwn/'):
     if file.endswith('.py'):
-        bot.load_extension(f'cogs.{file[:-3]}')
+        bot.load_extension(f'MyOwn.{file[:-3]}')
 
 @bot.event
 async def on_ready():
