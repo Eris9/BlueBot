@@ -50,6 +50,8 @@ async def instmod(ctx,cfg):
             author = mod["author"]
             files = mod["files"]
             modules = mod["modules"]
+            execx = mod["exec"]
+            pyexec = mod["pyexec"]
         except KeyError:
             return await ctx.author.send("ERROR: 'Cogcfg.json not made properly'")
         try:
@@ -66,10 +68,10 @@ async def instmod(ctx,cfg):
         for url2 in modules:
             os.system(f"cd modules/{name} && wget {url2}")    
         await loadring.edit(embed=discord.Embed(title="CogMaster",description="downloaded files...",color=ctx.author.color))
-        for file in listdir(f'cogs/{name}'):
+        for file in listdir(f'{cogd}/{name}'):
             if file.endswith('.py'):
-                bot.load_extension(f'cogs.{name}.{file[:-3]}')
-        asyncio.sleep(1)
+                bot.load_extension(f'{cogd}.{name}.{file[:-3]}')
+        await asyncio.sleep(1)
         try:
             cefg["toload"].append(name)
         except KeyError:
@@ -85,6 +87,30 @@ async def instmod(ctx,cfg):
             if file.endswith('.py'):
                 bot.unload_extension(f'{cogd}.{ext}.{file[:-3]}')
                 bot.load_extension(f'{cogd}.{ext}.{file[:-3]}')
+        await loadring.edit(embed=discord.Embed(title="CogMaster",description="Running postinstall, kindly check terminal",color=ctx.author.color))
+        if execx != "":
+            query = input(f"Would you like to run '{execx}' in terminal (y/n)?")
+            if query == "y":
+                os.system(execx)
+            if query == "n":
+                print("exec aborted")
+        if pyexec != "":
+            filename = ""
+            os.system(f"cd tempcfg && wget {pyexec}")
+            for filex in listdir("tempcfg/"):
+                if filex.endswith(".py"):
+                    os.system(f"cat tempfg/{file[:-3]}")
+                    filename = file[:-3]
+            query2 = input("With the file contents displayed above would you like to run this script (y/n)?")
+            if query2 == "y":
+                os.system(f"python tempcfg/{filname}")
+            if query2 == "n":
+                print("aborted")
+        await loadring.edit(embed=discord.Embed(title="CogMaster",description="Cleaning up!",color=ctx.author.color))
+        for filez in listdir("tempcfg"):
+            if filez.endswith(".json") or if filez.endswith(".json"):
+                os.system(f"rm -rf tempcfg/{file[:-3]}")
+        await asyncio.sleep(1)
         await loadring.edit(embed=discord.Embed(title="CogMaster",description=f"Finished installing {name} v{version} by {author}",color=discord.Color.green()))
     except:
         await loadring.edit(embed=discord.Embed(title="CogMaster",description=f"Failed install",color=discord.Color.red()))
