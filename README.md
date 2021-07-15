@@ -23,7 +23,10 @@ To setup your respository, simply create a github repository and put in the foll
 "version": "1.0",
 "author": "Eris9/Kaneki",
 "files": ["link1","link2pyfile"],
-"modules": ["link1","link2pyfile"]
+"modules": ["link1","link2pyfile"],
+"exec": "bash to execute eg. echo hi thank you for installing package by me, for more info check https://example.com leave blank for none",
+"pyexec": "link to pyfile to be executed leave blank for none"
+""
 }
 ```
 
