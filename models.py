@@ -3,25 +3,25 @@ release-example-json = {
 "category": [],
 "suite": "stable",
 "Version": 1,
-"author": "cydia-ios",
+"author": "name of author",
 "description": "description",
 "install_msg": "thank you for installing this repo",
-"agreement": "To install this we will be collecting .... and this can impact your privacy"
+"agreement": "To install this you agree to..." # leave "" for none
 }
 
 info-example-json = {
-    "author": ["PhenoM4n4n"],
-    "install_msg": "Thanks for installing AltDentifier!\nGet started with `[p]help AltDentifier`.",
-    "files":[],
-    "lib":[],
-    "name": "AltDentifier",
-    "disabled": false,
-    "short": "Check users with AltDentifier API",
-    "description": "Check users with AltDentifier API",
+    "author": ["author of cog"],
+    "install_msg": "Thanks for installing etc.",
+    "files":["example.py"],
+    "lib":["example.json"],
+    "name": "name of cog",
+    "disabled": false, # is cog disabled
+    "short": "short description",
+    "description": "long description",
     "tags": [],
-    "requirements": ["unidecode", "rapidfuzz"],
-    "hidden": false,
-    "end_user_data_statement": "This cog does not store any End User Data."
+    "requirements": ["example", "pip"], # pip installs
+    "hidden": false, # is cog hidden
+    "end_user_data_statement": "This cog does not store any End User Data." # privacy statement leave "" for none
 }
 
 packages-example-json = {
