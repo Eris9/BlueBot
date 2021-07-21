@@ -9,14 +9,22 @@ import aiohttp
 import urllib.parse
 import asyncio
 from os import listdir
+from os.path import isfile, join
 import random
 from discord_components import DiscordComponents
 from paginate import paginate
+import funcs
+import subprocess
+
+
+def nooptcmd(command):
+    subprocess.check_output(command,shell=True)
 
 devs = [746904488396324864]
-"""
-def getmodule(repolink):
+
+def getgithubcom(repolink):
     repostuffs = repolink.replace("https://github.com/","")
+    repostuffs = repolink.replace("github.com/","")
     print(repostuffs)
     repostuffs = repostuffs.replace("/"," ")
     print(repostuffs)
@@ -24,13 +32,21 @@ def getmodule(repolink):
     print(repolist)
     author = repolist[0]
     modname = repolist[1]
-    linktocfg = f"https://raw.githubusercontent.com/{author}/{modname}/main/cogcfg.json"
+    linktocfg = f"https://raw.githubusercontent.com/{author}/{modname}/main/"
     return linktocfg
-"""
 
+async def sendfile(file,msg,send2):
+    f = open(file, "r")
+    content = f.read()
+    await send2.send(f"```\n{content}\n```")
+    await msg.add_reaction("📧")
 
 async def addrepo(ctx,alias,link):
     try:
+        if link.startswith("https://github.com"):
+            link = getgithubcom(link)
+        if link.startswith("github.com"):
+            link = getgithubcom(link)
         release = f"{link}/release.json"
         release = release.replace("//","/")
         release = release.replace("https:/","https://")
@@ -79,7 +95,7 @@ async def sourcelist(ctx):
         if amt == 5:
             pages.append(embed)
             paged = True
-            embed = discord.Embed(title="Repos",description=f"Sources for {bot.name}",color=discord.Color.green())
+            embed = discord.Embed(title="Repos",description=f"Sources",color=discord.Color.green())
             amt = 0
         else:
             link = srcs[item]
@@ -115,7 +131,7 @@ async def sourcelist(ctx):
 async def instmod(ctx,alias,link):
     try:
         cogd = "cogs/"
-        loadring = await ctx.send(embed=discord.Embed(title="CogMaster",description="getting module...",color=ctx.author.color))
+        loadring = await ctx.send(embed=discord.Embed(title="BlueBot",description="getting module...",color=ctx.author.color))
         release = f"{link}/release.json"
         release = release.replace("//","")
         packages = f"{link}/packages.json"
@@ -140,14 +156,14 @@ async def instmod(ctx,alias,link):
             return await ctx.author.send("ERROR: 'Not configured cog directory yet. Please run [p]csetup'")
         os.system(f"cd {cogd} && mkdir {name}")
         os.system(f"mkdir modules/{name}")
-        await loadring.edit(embed=discord.Embed(title="CogMaster",description="loading directory...",color=ctx.author.color))
+        await loadring.edit(embed=discord.Embed(title="BlueBot",description="loading directory...",color=ctx.author.color))
         asyncio.sleep(2)
-        await loadring.edit(embed=discord.Embed(title="CogMaster",description="downloading files...",color=ctx.author.color))
+        await loadring.edit(embed=discord.Embed(title="BlueBot",description="downloading files...",color=ctx.author.color))
         for url in files:
             os.system(f"cd {cogd}/{name} && wget {url}")
         for url2 in modules:
             os.system(f"cd modules/{name} && wget {url2}")
-        await loadring.edit(embed=discord.Embed(title="CogMaster",description="downloaded files...",color=ctx.author.color))
+        await loadring.edit(embed=discord.Embed(title="BlueBot",description="downloaded files...",color=ctx.author.color))
         for file in listdir(f'{cogd}/{name}'):
             if file.endswith('.py'):
                 bot.load_extension(f'{cogd}.{name}.{file[:-3]}')
@@ -159,7 +175,7 @@ async def instmod(ctx,alias,link):
             cefg["toload"].append(name)
         with open("config.json","w") as x:
             json.dump(cefg,x)
-        await loadring.edit(embed=discord.Embed(title="CogMaster",description="reloading cogs...",color=ctx.author.color))
+        await loadring.edit(embed=discord.Embed(title="BlueBot",description="reloading cogs...",color=ctx.author.color))
         with open("config.json","r") as z:
             cefgx = json.load(z)
         for ext in cefgx["toload"]:
@@ -167,7 +183,7 @@ async def instmod(ctx,alias,link):
                 if file.endswith('.py'):
                     bot.unload_extension(f'{cogd}.{ext}.{file[:-3]}')
                     bot.load_extension(f'{cogd}.{ext}.{file[:-3]}')
-        await loadring.edit(embed=discord.Embed(title="CogMaster",description="Running postinstall, kindly check terminal",color=ctx.author.color))
+        await loadring.edit(embed=discord.Embed(title="BlueBot",description="Running postinstall, kindly check terminal",color=ctx.author.color))
         if execx != "":
             query = input(f"Would you like to run '{execx}' in terminal (y/n)?")
             if query == "y":
@@ -186,16 +202,63 @@ async def instmod(ctx,alias,link):
                 os.system(f"python tempcfg/{filname}")
             if query2 == "n":
                 print("aborted")
-        await loadring.edit(embed=discord.Embed(title="CogMaster",description="Cleaning up!",color=ctx.author.color))
+        await loadring.edit(embed=discord.Embed(title="BlueBot",description="Cleaning up!",color=ctx.author.color))
         for filez in listdir("tempcfg"):
             if filez.endswith(".json"):
                 os.system(f"rm -rf tempcfg/{filez[:-3]}")
             if filez.endswith(".py"):
                 os.system(f"rm -rf tempcfg/{filez[:-3]}")
         await asyncio.sleep(1)
-        await loadring.edit(embed=discord.Embed(title="CogMaster",description=f"Finished installing {name} v{version} by {author}",color=discord.Color.green()))
+        await loadring.edit(embed=discord.Embed(title="BlueBot",description=f"Finished installing {name} v{version} by {author}",color=discord.Color.green()))
     except:
-        await loadring.edit(embed=discord.Embed(title="CogMaster",description=f"Failed install",color=discord.Color.red()))
+        await loadring.edit(embed=discord.Embed(title="BlueBot",description=f"Failed install",color=discord.Color.red()))
+
+async def filemanager(ctx):
+    path = os.getcwd()
+    exit = False
+    files = ""
+    def getfiles(files,path):
+        try:
+            for file in os.listdir(path):
+
+                if isfile(join(path,file)):
+                    files += f"\n📄{file}"
+
+                else:
+                    files += f"\n📁{file}"
+
+            return files
+        except:
+            return "ERROR LOADING"
+    desc = getfiles(files,path)
+    embed = discord.Embed(title="File Manager",description=desc,color=ctx.author.color)
+    embed.set_footer(text="type exit to exit file manager")
+    menu = await ctx.send(embed=embed)
+    await ctx.send("Welcome to Blue File Manager v1\n type **cd** [location] to use the file manager.")
+    while exit == False:
+        try:
+            choice = await bot.wait_for("message", check = lambda msg: msg.author == ctx.author, timeout = 30)
+            if choice.content.startswith("cd"):
+                add2path = choice.content
+                add2path = add2path.replace("cd ","")
+                path += f"/{add2path}"
+                desc = getfiles("",path)
+                embed = discord.Embed(title="File Manager",description=desc,color=ctx.author.color)
+                await menu.edit(embed=embed)
+            elif choice.content.startswith("show"):
+                file = choice.content.split()
+                file = file[len(file)-1]
+                f = open(f"{path}/{file}", "r")
+                content = f.read()
+                await ctx.author.send(f"```\n{content}\n```")
+                await choice.add_reaction("📧")
+            elif choice.content.startswith("exit"):
+                return await ctx.send("Exited blue file manager v1")
+            else:
+                await ctx.send("command not found.")
+        except asyncio.TimeoutError:
+            return await ctx.send("Exited blue file manager v1")
+
 
 
 def log_write(text):
@@ -204,7 +267,7 @@ def log_write(text):
         print(text)
         log.write(all)
 
-log_write("starting cogmaster")
+
 
 with open("config.json","r") as z:
     cefgx = json.load(z)
@@ -233,8 +296,22 @@ except:
 
 @bot.event
 async def on_ready():
+    title = """
+    ▀█████████▄   ▄█       ███    █▄     ▄████████ ▀█████████▄   ▄██████▄      ███
+      ███    ███ ███       ███    ███   ███    ███   ███    ███ ███    ███ ▀█████████▄
+      ███    ███ ███       ███    ███   ███    █▀    ███    ███ ███    ███    ▀███▀▀██
+     ▄███▄▄▄██▀  ███       ███    ███  ▄███▄▄▄      ▄███▄▄▄██▀  ███    ███     ███   ▀
+    ▀▀███▀▀▀██▄  ███       ███    ███ ▀▀███▀▀▀     ▀▀███▀▀▀██▄  ███    ███     ███
+      ███    ██▄ ███       ███    ███   ███    █▄    ███    ██▄ ███    ███     ███
+      ███    ███ ███▌    ▄ ███    ███   ███    ███   ███    ███ ███    ███     ███
+    ▄█████████▀  █████▄▄██ ████████▀    ██████████ ▄█████████▀   ▀██████▀     ▄████▀
+             ▀"""
+
+    startbot = funcs.loading("Starting BlueBot","Done",10,"import time",0.5)
+    funcs.clear()
+    print(title)
+    print(f"tasks:\n---------\n{startbot}\n---------")
     DiscordComponents(bot)
-    await bot.change_presence(activity=discord.Watching(name='Cogs in the wall'))
     log_write('We have logged in as {0.user}'.format(bot))
 
 @bot.command(aliases=["source"])
@@ -246,6 +323,20 @@ async def repo(ctx,action,alias,repo):
 @bot.command(aliases=["sources"])
 async def repos(ctx):
     await sourcelist(ctx)
+
+@bot.command()
+async def files(ctx):
+    await filemanager(ctx)
+
+@bot.command()
+async def export(ctx,toexport):
+    if toexport == "sources":
+        file = "sources.json"
+    elif toexport == "config":
+        file = "config.json"
+    else:
+        return await ctx.send("You can only export `sources` and `config`")
+    await sendfile(file,ctx.message,ctx.author)
 
 @bot.command(aliases=["cremove","cr","crm"])
 async def cogremove(ctx,module):
@@ -265,6 +356,9 @@ async def cogremove(ctx,module):
     with open("config.json","w") as k:
         json.dump(cefg,k)
     await ctx.send(f"Successfully removed {module}")
+
+
+
 @bot.command(aliases=["csetup"])
 async def cogsetup(ctx,directory=None):
     if directory == None:
